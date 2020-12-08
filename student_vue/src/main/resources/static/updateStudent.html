@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>修改学生信息</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+	</head>
+
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+					<div id="header">
+						<div id="rightheader">
+							<p>
+								2020/12/07
+								<br />
+								<br />
+								<br />
+								<a href="javascript:;" @click="logout">安全退出</a>
+							</p>
+						</div>
+						<div id="topheader">
+							<h1 id="title">
+								<a href="/student">主页</a>
+							</h1>
+						</div>
+						<div id="navigation">
+						</div>
+					</div>
+				<div id="content" align="center">
+					<p id="whereami">
+					</p>
+					<h1>
+						添加学生信息
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+					</h1>
+					<form action="studentlist.html" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									编号:
+								</td>
+								<td valign="middle" align="left">
+									{{student.id}}
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									当前头像:
+								</td>
+								<td valign="middle" align="left">
+									<img :src="student.photopath == null ? '/photos/sxc.jpg' : '/photos/' + student.photopath" style="height: 60px;">
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									姓名:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" name="name" v-model="student.name"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									头像:
+								</td>
+								<td valign="middle" align="left">
+									<input type="file" ref="photo" />
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									余额:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" name="salary" v-model="student.balance"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									年龄:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" name="age" v-model="student.age"/>
+								</td>
+							</tr>
+						</table>
+						<p>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="button" @click="editStudent" class="button" value="确认" />
+							<input type="reset" class="button" value="重置">
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					<a href="https://github.com/Ges0ng">
+						Paracosm
+					</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
+
+<script src="/js/vue.js"></script>
+<script src="/js/axios.min.js"></script>
+<script>
+	var app = new Vue({
+		el: "#wrap",
+		data: {	//数据
+			user:{	//存放用户登录信息
+
+			},
+			student:{
+
+			}
+		},
+		methods: {	//自定义函数
+			logout(){	//安全退出
+				localStorage.removeItem("user");
+				location.reload(true);//刷新页面
+			},
+			editStudent(){
+				console.log(this.student);
+				console.log(this.$refs.photo.files[0]);
+
+				var formData = new FormData();
+				formData.append("id",this.student.id);
+				formData.append("name",this.student.name);
+				formData.append("photoPath",this.student.photoPath)
+				formData.append("balance",this.student.balance);
+				formData.append("age",this.student.age);
+				formData.append("photo",this.$refs.photo.files[0]);
+
+				var _this = this;
+
+				axios({
+					method: "post",
+					url: "/student/update",
+					data: formData,
+					headers: {
+						'content-type':'multipart/form-data'
+					}
+				}).then(res=>{
+					console.log(res.data);
+					if (res.data.state){
+						if (window.confirm(res.data.msg + ",返回主页面")) {
+							location.href = "/student";
+						}
+					}else {
+						alert(res.data.msg);
+					}
+				});
+			}
+		},
+		created(){	//生命周期函数
+			var userString = localStorage.getItem("user");	//还是json格式
+			if (userString){
+				this.user = JSON.parse(userString);	//转换为对象
+			}else {
+				location.href="/";
+			}
+			//获取对应的id信息
+			var start = location.href.lastIndexOf("=");
+			var id = location.href.substr(start+1);
+			console.log(id);
+			//查询个人信息
+			var _this = this;
+			axios.get("/student/selectOne?id="+id).then(res =>{
+				console.log(res.data);
+				_this.student = res.data;
+			});
+
+		}
+	});
+</script>

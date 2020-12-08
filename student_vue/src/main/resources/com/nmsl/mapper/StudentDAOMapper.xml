@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nmsl.dao.StudentDAO">
+
+    <cache type="com.nmsl.Cache.RedisCache"/>
+
+
+    <select id="selectAll" resultType="Student">
+        select id,name,photopath,balance,age
+        from t_student
+    </select>
+
+    <!--
+    生成主键    useGeneratedKeys="true"
+    主键设置    keyProperty="id"
+    -->
+
+    <insert id="insert" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+        insert into t_student values(#{id},#{name},#{photopath},#{balance},#{age})
+    </insert>
+
+    <delete id="deleteById">
+        delete from t_student where id=#{id}
+    </delete>
+
+    <select id="selectOne" parameterType="String" resultType="Student">
+        select id,name,photopath,balance,age
+        from t_student
+        where id=#{id}
+    </select>
+
+    <update id="update" parameterType="Student">
+        update t_student
+        set name=#{name},
+            photopath=#{photopath},
+            balance=#{balance},
+            age=#{age}
+        where id = #{id}
+
+    </update>
+</mapper>
+    
